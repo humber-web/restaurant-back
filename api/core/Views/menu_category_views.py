@@ -24,7 +24,7 @@ class MenuCategoryListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        categories = MenuCategory.objects.all()
+        categories = MenuCategory.objects.all().order_by('categoryID')
         serializer = MenuCategorySerializer(categories, many=True)
         return Response(serializer.data)
     

@@ -12,13 +12,15 @@ from ..check_manager import IsManager
 from ..models.historyc_models import OperationLog
 from core.models.menu_item_models import MenuItem
 from decimal import Decimal
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class ListOrdersView(APIView):
     permission_classes = [IsAuthenticated, IsManager] 
     
     def get(self, request):
-        orders = Order.objects.all()
+        orders = Order.objects.all().order_by('orderID')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
     
@@ -40,6 +42,7 @@ class OrderDetailView(APIView):
             payment_status = request.query_params.get('payment_status')
             order_type = request.query_params.get('order_type')
             table = request.query_params.get('table')
+            data = request.query_params.get('data')
             
             queryset = Order.objects.all()
             
@@ -54,19 +57,29 @@ class OrderDetailView(APIView):
             if table:
                 queryset = queryset.filter(details__table__tableid=table)
                 queryset = queryset.exclude(paymentStatus='PAID')  # Exclude PAID orders only when searching by table
+            if data:
+                queryset = queryset.filter(created_at__icontains=data)
             if not queryset.exists():
                 raise Http404
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
 class CreateOrderView(APIView):
-    def post(self, request, *args, **kwargs):
+     permission_classes = [IsAuthenticated]
+
+     def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+        
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save(last_updated_by=request.user)
             request.body_data['object_id'] = order.orderID
+            
+           
             return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST,)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
 class UpdateOrderItemsView(APIView):

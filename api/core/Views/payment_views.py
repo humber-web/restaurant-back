@@ -45,6 +45,15 @@ class ProcessPaymentView(APIView):
         else:
             order.paymentStatus = 'PARTIALLY_PAID'
         order.save()
+        
+         # Update table status
+        table = order.details.table
+        if table:
+            if order.paymentStatus == 'PAID':
+                table.status = 'AV'
+            else:
+                table.status = 'OC'
+            table.save()
 
         change_due = max(0, amount - order.grandTotal)
 

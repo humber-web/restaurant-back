@@ -27,7 +27,7 @@ class MenuItemListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        items = MenuItem.objects.all()
+        items = MenuItem.objects.all().order_by('itemID')
         serializer = MenuItemSerializer(items, many=True)
         return Response(serializer.data)
     
@@ -94,3 +94,28 @@ class MenuItemDeleteView(APIView):
         )
         item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+    
+class MenuItemCategoryListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        categories = []
+        
+        all_items = MenuItem.objects.all()
+        categories.append({
+            'name': 'Todas',
+            'total': all_items.count(),
+            'items': MenuItemSerializer(all_items, many=True).data
+        })
+        
+        for category in MenuCategory.objects.all():
+            items = MenuItem.objects.filter(categoryID=category)
+            categories.append({
+                'name': category.name,
+                'total': items.count(),
+                'items': MenuItemSerializer(items, many=True).data
+            })
+        
+        return Response(categories)

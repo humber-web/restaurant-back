@@ -4,7 +4,7 @@ from django.urls import path
 from core.Views.user_views import CreateUserView, ProfileView, GroupListView, UserListView, UserDetailView, UserUpdateView, UserDeleteView
 from core.Views.auth_views import CreateCustomerView, LoginView
 from core.Views.menu_category_views import CreateMenuCategoryView, MenuCategoryListView, MenuCategoryDetailView, MenuCategoryUpdateView, MenuCategoryDeleteView
-from core.Views.menu_item_views import CreateMenuItemView, MenuItemListView, MenuItemDetailView, MenuItemUpdateView, MenuItemDeleteView
+from core.Views.menu_item_views import CreateMenuItemView, MenuItemListView, MenuItemDetailView, MenuItemUpdateView, MenuItemDeleteView, MenuItemCategoryListView
 from core.Views.inventory_item_views import CreateInventoryItemView, InventoryItemListView, InventoryItemDetailView, InventoryItemUpdateView, InventoryItemDeleteView
 from core.Views.table_views import CreateTableView, TableListView, TableDetailView, TableUpdateView, TableDeleteView
 from core.Views.order_views import CreateOrderView, UpdateOrderItemsView, TransferOrderItemsView, ListOrdersView, OrderDetailView, DeleteOrderView
@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/menu_item/<int:pk>/update/', MenuItemUpdateView.as_view(), name='update_menu_item'),
     path('api/menu_item/<int:pk>/delete/', MenuItemDeleteView.as_view(), name='delete_menu_item'),
     path('api/menu_item/search/', MenuItemDetailView.as_view(), name='search_menu_item'),
+     path('api/menu_item/category/', MenuItemCategoryListView.as_view(), name='menu_item_categories'),
     
     
     # InventoryItem url

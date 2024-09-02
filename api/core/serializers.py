@@ -58,11 +58,15 @@ class TableSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
-        fields = ['menu_item', 'quantity', 'price']
-        read_only_fields = ['price']
+        fields = ['menu_item', 'name','quantity', 'price', 'status', 'to_be_prepared_in']
+        read_only_fields = ['price', 'name', 'to_be_prepared_in']
+        
+    def get_name(self, obj):
+        return obj.menu_item.name
         
 class OrderDetailsSerializer(serializers.ModelSerializer):
     table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all(), allow_null=True, required=False)
@@ -122,6 +126,11 @@ class OrderSerializer(serializers.ModelSerializer):
 
         
         OrderDetails.objects.create(order=order, **order_details_data)
+        
+        table = order_details_data.get('table')
+        if table:
+            table.status = 'OC'
+            table.save()
         
         order.totalAmount = total_amount
         order.totalIva = total_iva

@@ -28,7 +28,7 @@ class InventoryItemListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        items = InventoryItemN.objects.all()
+        items = InventoryItemN.objects.all().order_by('itemID')
         serializer = InventoryItemSerializer(items, many=True)
         return Response(serializer.data)
 

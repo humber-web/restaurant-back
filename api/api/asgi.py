@@ -8,9 +8,23 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
 """
 
 import os
-
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from .routing import websocket_urlpatterns
 from django.core.asgi import get_asgi_application
+from core.tasks import listen_to_db
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            websocket_urlpatterns
+        )
+    ),
+})
+
+import asyncio
+loop = asyncio.get_event_loop()
+loop.create_task(listen_to_db())

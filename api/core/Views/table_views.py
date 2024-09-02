@@ -27,7 +27,7 @@ class TableListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        items = Table.objects.all()
+        items = Table.objects.all().order_by('tableid')
         serializer = TableSerializer(items, many=True)
         return Response(serializer.data)
     
